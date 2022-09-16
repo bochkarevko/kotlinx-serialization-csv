@@ -48,6 +48,30 @@ class CsvDecoderTest {
     }
 
     @Test
+    fun wrongOrder() {
+        val csv = """
+            baz,bar
+            42,
+        """.trimIndent()
+
+        assertFailsWith<IllegalArgumentException> {
+            CSVFormat.decodeFromString(FooNull.serializer(), csv)
+        }
+    }
+
+    @Test
+    fun wrongNames() {
+        val csv = """
+            foo,baz
+            42,
+        """.trimIndent()
+
+        assertFailsWith<IllegalArgumentException> {
+            CSVFormat.decodeFromString(FooNull.serializer(), csv)
+        }
+    }
+
+    @Test
     fun nullableFirst() {
         val csv = """
             baz,bar

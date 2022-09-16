@@ -191,6 +191,30 @@ class CsvEncoderTest {
     }
 
     @Test
+    fun complexInlineTest() {
+        val csv = CSVFormat.encodeToString(
+            value = List(size = 3) {
+                FooComplex(
+                    bar = if (it == 1) "Something" else null,
+                    inline = FooInline(42),
+                    enum = FooEnum.A.Three,
+                    instant = Instant.fromEpochSeconds(it.toLong())
+                )
+            }
+        )
+
+        assertEquals(
+            expected = """
+                bar,foo,enum,instant
+                ,42,Three,1970-01-01T00:00:00Z
+                Something,42,Three,1970-01-01T00:00:01Z
+                ,42,Three,1970-01-01T00:00:02Z
+            """.trimIndent(),
+            actual = csv
+        )
+    }
+
+    @Test
     fun custom() {
         val csv = CSVFormat(separator = ";", lineSeparator = "\r\n").encodeToString(
             FooNull.serializer(),
@@ -202,4 +226,17 @@ class CsvEncoderTest {
             actual = csv
         )
     }
+
+//    @Test
+//    fun listTest() {
+//        val csv = CSVFormat(separator = ";", lineSeparator = "\r\n").encodeToString(
+//            FooNull.serializer(),
+//            FooNull(bar = 42, baz = null)
+//        )
+//
+//        assertEquals(
+//            expected = "bar;baz\r\n42;",
+//            actual = csv
+//        )
+//    }
 }
