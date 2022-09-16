@@ -38,23 +38,28 @@ public sealed class CSVFormat(
         )
     }
 
-    override fun <T> encodeToString(serializer: SerializationStrategy<T>, value: T): String = buildString {
-        serializer.descriptor.checkForLists()
-        var afterFirst = false
+    override fun <T> encodeToString(serializer: SerializationStrategy<T>, value: T): String =
+        encodeToString(serializer, value, true)
 
-        serializer.descriptor.flatNames.forEach {
-            if (afterFirst) {
-                append(separator)
+    public fun <T> encodeToString(serializer: SerializationStrategy<T>, value: T, withHeader: Boolean): String =
+        buildString {
+            serializer.descriptor.checkForLists()
+            var afterFirst = false
+
+            if (withHeader) {
+                serializer.descriptor.flatNames.forEach {
+                    if (afterFirst) {
+                        append(separator)
+                    }
+                    append(it)
+                    afterFirst = true
+                }
+                append(lineSeparator)
             }
-            append(it)
-            afterFirst = true
-        }
 
-        append(lineSeparator)
-
-        serializer.serialize(
-            encoder = CSVEncoder(this, separator, lineSeparator, serializersModule),
-            value = value
-        )
-    }.trimEnd()
+            serializer.serialize(
+                encoder = CSVEncoder(this, separator, lineSeparator, serializersModule),
+                value = value
+            )
+        }.trimEnd()
 }
