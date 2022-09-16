@@ -50,9 +50,11 @@ public sealed class CSVFormat(
             afterFirst = true
         }
 
+        append(lineSeparator)
+
         serializer.serialize(
             encoder = CSVEncoder(this, separator, lineSeparator, serializersModule),
             value = value
         )
-    }
+    }.trimEnd()
 }

@@ -32,7 +32,6 @@ internal class CSVEncoder(
 
     override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
         if (level == 0) {
-            builder.append(lineSeparator)
             afterFirst = false
         }
         level++
@@ -43,11 +42,13 @@ internal class CSVEncoder(
 
     override fun endStructure(descriptor: SerialDescriptor) {
         level--
+        if (level == 0) {
+            builder.append(lineSeparator)
+        }
     }
 
     override fun encodeInline(descriptor: SerialDescriptor): Encoder {
         if (level == 0) {
-            builder.append(lineSeparator)
             afterFirst = false
         }
         return this
