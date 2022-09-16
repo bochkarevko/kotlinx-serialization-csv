@@ -50,7 +50,7 @@ public sealed class CSVFormat(
             var afterFirst = false
 
             if (withHeader) {
-                serializer.descriptor.flatNames.forEach {
+                serializer.descriptor.names.forEach {
                     if (afterFirst) {
                         append(separator)
                     }
