@@ -250,7 +250,7 @@ class CsvEncoderTest {
             expected = """
                     baz,child
                     42,[,1,,2]
-                """.trimIndent(),
+            """.trimIndent(),
             actual = csv
         )
     }

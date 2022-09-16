@@ -44,11 +44,13 @@ internal fun SerialDescriptor.canBeFlattened(): Boolean =
 @ExperimentalSerializationApi
 internal fun SerialDescriptor.isTrivial(): Boolean =
     elementDescriptors.all { descriptor ->
+        if (descriptor.elementsCount == 0) {
+            return true
+        }
         when (descriptor.kind) {
             is PrimitiveKind -> true
             StructureKind.LIST -> descriptor.elementDescriptors.first().isTrivial()
-            StructureKind.MAP -> error { "Maps are not supported yet" } // TODO: Map entry is not that trivial
-            else -> descriptor.elementsCount == 0 || (descriptor.elementsCount == 1 && descriptor.elementDescriptors.first()
-                .isTrivial())
+            StructureKind.MAP -> error { "Maps are not supported yet" }
+            else -> descriptor.elementsCount == 1 && descriptor.elementDescriptors.first().isTrivial()
         }
     }
