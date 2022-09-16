@@ -61,7 +61,6 @@ public sealed class CSVFormat(
 
     public fun <T> encodeToString(serializer: SerializationStrategy<T>, value: T, withHeader: Boolean): String =
         buildString {
-            serializer.descriptor.checkForLists()
             var afterFirst = false
 
             if (withHeader) {

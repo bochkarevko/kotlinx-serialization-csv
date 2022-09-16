@@ -23,6 +23,9 @@ data class FooNested(val baz: Int?, val child: FooNullFirst, val foo: Int)
 data class FooList(val baz: Int?, val child: List<FooNullFirst>)
 
 @Serializable
+data class FooNestedList(val baz: Int?, val children: List<FooList>)
+
+@Serializable
 data class FooEnum(val baz: Int?, val foo: A) {
     @Serializable
     enum class A {

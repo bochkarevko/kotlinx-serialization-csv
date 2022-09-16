@@ -77,24 +77,31 @@ class CsvEncoderTest {
 
     @Test
     fun nestedList() {
-        assertFailsWith<IllegalStateException> {
+        assertFailsWith<IllegalArgumentException> {
             val csv = CSVFormat.encodeToString(
-                serializer = FooList.serializer(),
-                value = FooList(
-                    baz = 42,
-                    child = listOf(
-                        FooNullFirst(baz = null, bar = 1),
-                        FooNullFirst(baz = null, bar = 2)
+                value = listOf(
+                    FooNestedList(
+                        baz = 2,
+                        children = listOf(
+                            FooList(
+                                baz = 4,
+                                child = listOf(
+                                    FooNullFirst(baz = null, bar = 8),
+                                    FooNullFirst(baz = null, bar = 16)
+                                )
+                            ),
+                            FooList(
+                                baz = 42,
+                                child = listOf(
+                                    FooNullFirst(baz = null, bar = 23),
+                                    FooNullFirst(baz = null, bar = 42)
+                                )
+                            )
+                        )
                     )
                 )
             )
-            assertEquals(
-                expected = """
-                    baz,baz,bar,baz,bar
-                    42,,1,,2
-                """.trimIndent(),
-                actual = csv
-            )
+            println(csv)
         }
     }
 
@@ -227,16 +234,24 @@ class CsvEncoderTest {
         )
     }
 
-//    @Test
-//    fun listTest() {
-//        val csv = CSVFormat(separator = ";", lineSeparator = "\r\n").encodeToString(
-//            FooNull.serializer(),
-//            FooNull(bar = 42, baz = null)
-//        )
-//
-//        assertEquals(
-//            expected = "bar;baz\r\n42;",
-//            actual = csv
-//        )
-//    }
+    @Test
+    fun innerList() {
+        val csv = CSVFormat.encodeToString(
+            serializer = FooList.serializer(),
+            value = FooList(
+                baz = 42,
+                child = listOf(
+                    FooNullFirst(baz = null, bar = 1),
+                    FooNullFirst(baz = null, bar = 2)
+                )
+            )
+        )
+        assertEquals(
+            expected = """
+                    baz,child
+                    42,[,1,,2]
+                """.trimIndent(),
+            actual = csv
+        )
+    }
 }
