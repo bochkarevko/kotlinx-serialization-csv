@@ -26,10 +26,25 @@ public sealed class CSVFormat(
             Custom(separator, lineSeparator, serializersModule)
     }
 
-    override fun <T> decodeFromString(deserializer: DeserializationStrategy<T>, string: String): T {
+    public inline fun <reified T> decodeFromString(string: String): T =
+        decodeFromString(serializersModule.serializer(), string, true)
+
+    override fun <T> decodeFromString(deserializer: DeserializationStrategy<T>, string: String): T =
+        decodeFromString(deserializer, string, true)
+
+    public fun <T> decodeFromString(deserializer: DeserializationStrategy<T>, string: String, withHeader: Boolean): T {
         deserializer.descriptor.checkForLists()
         val lines = string.split(lineSeparator)
-        val data = lines.drop(1).map { it.split(separator) }
+        val data = if (withHeader) {
+            val deserializerNames = deserializer.descriptor.names
+            val csvNames = lines.first().split(separator).asSequence()
+            require(deserializerNames.zip(csvNames).all { it.first == it.second }) {
+                "Header names and their order should match those of the structure"
+            }
+            lines.drop(1).map { it.split(separator) }
+        } else {
+            lines.map { it.split(separator) }
+        }
         return deserializer.deserialize(
             decoder = CSVDecoder(
                 data = data,
