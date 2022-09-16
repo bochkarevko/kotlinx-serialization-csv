@@ -38,6 +38,9 @@ public sealed class CSVFormat(
         )
     }
 
+    public inline fun <reified T> encodeToString(value: T, withHeader: Boolean = true): String =
+        encodeToString(serializersModule.serializer(), value, withHeader)
+
     override fun <T> encodeToString(serializer: SerializationStrategy<T>, value: T): String =
         encodeToString(serializer, value, true)
 
