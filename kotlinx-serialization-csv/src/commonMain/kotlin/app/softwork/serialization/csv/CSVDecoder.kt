@@ -14,9 +14,12 @@ internal class CSVDecoder(
     private var index = 0
     private var level = 0
     private var currentRow = 0
+    private var dropStart = 0
 
     override fun beginStructure(descriptor: SerialDescriptor): CSVDecoder {
-        if (descriptor.kind !is StructureKind.LIST) {
+        if (descriptor.kind is StructureKind.LIST || descriptor.kind is StructureKind.MAP) {
+            dropStart += 1 // move over `[`
+        } else {
             level += 1
         }
         return this
@@ -36,7 +39,11 @@ internal class CSVDecoder(
         error("Never called, because decodeSequentially returns true")
     }
 
-    override fun decodeCollectionSize(descriptor: SerialDescriptor) = data.size
+    override fun decodeCollectionSize(descriptor: SerialDescriptor): Int {
+        // TODO: this and decodeElementIndex should be implemented properly
+        println("decode collection size called")
+        return data.size
+    }
     override fun decodeSequentially(): Boolean = true
 
     override fun decodeNull(): Nothing? {
@@ -63,7 +70,7 @@ internal class CSVDecoder(
     override fun decodeString(): String {
         val value = data[currentRow].getOrNull(index) ?: error("Missing attribute at $index in line $currentRow")
         index += 1
-        return value
+        return value.drop(dropStart).trimEnd(']').also { dropStart = 0 }
     }
 
     override fun decodeEnum(enumDescriptor: SerialDescriptor) = enumDescriptor.elementNames.indexOf(decodeString())
