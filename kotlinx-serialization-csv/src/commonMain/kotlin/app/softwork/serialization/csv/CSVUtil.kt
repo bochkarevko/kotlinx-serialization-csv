@@ -18,12 +18,37 @@ internal val SerialDescriptor.names: Sequence<String>
         }
     }
 
+/**
+ * Checks that all descriptors inside this one (if there are any) can be put into a single column.
+ * @see SerialDescriptor.isTrivial
+ */
 @ExperimentalSerializationApi
-internal fun SerialDescriptor.checkForLists() {
-    for (descriptor in elementDescriptors) {
-        if (descriptor.kind is StructureKind.LIST || descriptor.kind is StructureKind.MAP) {
-            error("List or Map are not yet supported")
+internal fun SerialDescriptor.canBeFlattened(): Boolean =
+    elementDescriptors.all { descriptor ->
+        when (descriptor.kind) {
+            is PrimitiveKind -> true
+            is SerialKind.ENUM -> true
+            is SerialKind.CONTEXTUAL -> true
+            StructureKind.LIST -> descriptor.elementDescriptors.first().isTrivial()
+            StructureKind.MAP -> descriptor.elementDescriptors.first().isTrivial()
+            else -> {
+                val inside = descriptor.elementDescriptors.toList()
+                inside.all { it.canBeFlattened() }
+            }
         }
-        descriptor.checkForLists()
     }
-}
+
+/**
+ * Checks that this descriptor can be put into a single column. If not, then it cannot be safely put into a csv.
+ */
+@ExperimentalSerializationApi
+internal fun SerialDescriptor.isTrivial(): Boolean =
+    elementDescriptors.all { descriptor ->
+        when (descriptor.kind) {
+            is PrimitiveKind -> true
+            StructureKind.LIST -> descriptor.elementDescriptors.first().isTrivial()
+            StructureKind.MAP -> error { "Maps are not supported yet" } // TODO: Map entry is not that trivial
+            else -> descriptor.elementsCount == 0 || (descriptor.elementsCount == 1 && descriptor.elementDescriptors.first()
+                .isTrivial())
+        }
+    }

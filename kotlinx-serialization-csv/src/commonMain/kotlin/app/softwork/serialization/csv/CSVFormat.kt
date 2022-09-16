@@ -33,7 +33,7 @@ public sealed class CSVFormat(
         decodeFromString(deserializer, string, true)
 
     public fun <T> decodeFromString(deserializer: DeserializationStrategy<T>, string: String, withHeader: Boolean): T {
-        deserializer.descriptor.checkForLists()
+        require(deserializer.descriptor.canBeFlattened()) { "Non-trivial nested collections are not supported" }
         val lines = string.split(lineSeparator)
         val data = if (withHeader) {
             val deserializerNames = deserializer.descriptor.names
@@ -59,8 +59,9 @@ public sealed class CSVFormat(
     override fun <T> encodeToString(serializer: SerializationStrategy<T>, value: T): String =
         encodeToString(serializer, value, true)
 
-    public fun <T> encodeToString(serializer: SerializationStrategy<T>, value: T, withHeader: Boolean): String =
-        buildString {
+    public fun <T> encodeToString(serializer: SerializationStrategy<T>, value: T, withHeader: Boolean): String {
+        require(serializer.descriptor.canBeFlattened()) { "Non-trivial nested collections are not supported" }
+        return buildString {
             var afterFirst = false
 
             if (withHeader) {
@@ -79,4 +80,5 @@ public sealed class CSVFormat(
                 value = value
             )
         }.trimEnd()
+    }
 }

@@ -103,7 +103,7 @@ class CsvDecoderTest {
 
     @Test
     fun nestedList() {
-        assertFailsWith<IllegalStateException> {
+        assertFailsWith<IllegalArgumentException> {
             val csv = """
                 baz,baz,bar,baz,bar
                 42,,1,,2
