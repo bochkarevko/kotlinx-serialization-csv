@@ -105,8 +105,8 @@ class CsvDecoderTest {
     fun nestedList() {
         assertFailsWith<IllegalArgumentException> {
             val csv = """
-                baz,baz,bar,baz,bar
-                42,,1,,2
+                baz,child
+                42,[,1,,2]
             """.trimIndent()
 
             assertEquals(
@@ -120,6 +120,19 @@ class CsvDecoderTest {
                 actual = CSVFormat.decodeFromString(FooList.serializer(), csv)
             )
         }
+    }
+
+    @Test
+    fun allowedNestedList() {
+        val csv = """
+                data
+                [[[[1,2][3,4]]][[[5,6]]]]
+            """.trimIndent()
+
+        assertEquals(
+            expected = List4D(listOf(listOf(listOf(listOf(1, 2), listOf(3, 4))), listOf(listOf(listOf(5, 6))))),
+            actual = CSVFormat.decodeFromString(List4D.serializer(), csv)
+        )
     }
 
     @Test

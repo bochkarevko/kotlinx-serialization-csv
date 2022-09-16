@@ -39,3 +39,6 @@ value class FooInline(val foo: Int)
 
 @Serializable
 data class FooComplex(val bar: String?, val inline: FooInline, val enum: FooEnum.A, val instant: Instant)
+
+@Serializable
+data class List4D(val data: List<List<List<List<Int>>>>)
